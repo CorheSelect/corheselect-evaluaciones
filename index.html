@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Técnica - CoRheSelect</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; text-align: center; }
+        .logo { font-size: 48px; margin-bottom: 10px; }
+        .header h1 { font-size: 32px; margin-bottom: 10px; }
+        .header p { font-size: 16px; opacity: 0.9; }
+        .progress-container { padding: 20px 40px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; }
+        .progress-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; color: #4a5568; font-weight: 500; }
+        .progress-bar { height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); transition: width 0.3s ease; border-radius: 4px; }
+        .content { padding: 40px; }
+        .welcome-screen { display: block; padding: 20px 0; }
+        .welcome-screen h2 { color: #2d3748; font-size: 28px; margin-bottom: 20px; }
+        .welcome-intro { background: #edf2f7; border-left: 4px solid #667eea; padding: 24px; border-radius: 8px; margin-bottom: 24px; }
+        .welcome-intro p { color: #2d3748; font-size: 16px; line-height: 1.8; margin-bottom: 12px; }
+        .welcome-intro strong { color: #667eea; }
+        .instructions { background: #f7fafc; border-left: 4px solid #667eea; padding: 24px; border-radius: 8px; margin-bottom: 24px; }
+        .instructions h3 { color: #667eea; font-size: 20px; margin-bottom: 16px; }
+        .instructions ul { list-style: none; padding: 0; }
+        .instructions li { padding: 12px 0; color: #4a5568; font-size: 16px; line-height: 1.6; display: flex; align-items: flex-start; gap: 12px; }
+        .instructions li:before { content: "✓"; color: #667eea; font-weight: bold; font-size: 18px; }
+        .privacy-notice { background: #edf2f7; padding: 20px; border-radius: 8px; margin-bottom: 24px; }
+        .privacy-notice h4 { color: #2d3748; font-size: 16px; margin-bottom: 12px; }
+        .privacy-notice p { color: #4a5568; font-size: 14px; line-height: 1.6; }
+        .start-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .start-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4); }
+        .loading { text-align: center; padding: 80px 20px; color: #718096; display: none; }
+        .loading-spinner { width: 60px; height: 60px; border: 5px solid #e2e8f0; border-top-color: #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading h3 { font-size: 20px; color: #2d3748; margin-bottom: 8px; }
+        .question-card { background: #f7fafc; border-radius: 16px; padding: 40px; border-left: 5px solid #667eea; margin-bottom: 30px; }
+        .question-number { color: #667eea; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+        .question-text { font-size: 22px; font-weight: 600; color: #2d3748; line-height: 1.6; margin-bottom: 30px; }
+        .options-container { display: grid; gap: 16px; }
+        .option { background: white; border: 3px solid #e2e8f0; border-radius: 12px; padding: 20px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: flex-start; gap: 16px; }
+        .option:hover { border-color: #667eea; background: #f7fafc; transform: translateX(4px); }
+        .option.selected { border-color: #667eea; background: #edf2f7; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2); }
+        .option-letter { width: 44px; height: 44px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; color: #4a5568; flex-shrink: 0; transition: all 0.2s ease; }
+        .option.selected .option-letter { background: #667eea; color: white; transform: scale(1.1); }
+        .option-text { flex: 1; color: #2d3748; font-size: 17px; line-height: 1.5; }
+        .navigation { display: flex; gap: 20px; justify-content: space-between; margin-top: 40px; }
+        .btn { padding: 18px 36px; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; }
+        .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+        .btn-secondary { background: #e2e8f0; color: #2d3748; }
+        .btn-secondary:hover:not(:disabled) { background: #cbd5e0; transform: translateY(-2px); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; flex: 1; }
+        .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4); }
+        .success-screen { display: none; text-align: center; padding: 60px 40px; }
+        .success-icon { width: 100px; height: 100px; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; animation: scaleIn 0.5s ease; }
+        @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+        .success-icon svg { width: 50px; height: 50px; stroke: white; stroke-width: 3; fill: none; }
+        .success-screen h2 { font-size: 36px; color: #2d3748; margin-bottom: 16px; }
+        .success-screen p { font-size: 18px; color: #718096; line-height: 1.6; margin-bottom: 30px; }
+        .score-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 16px; padding: 40px; margin: 30px 0; }
+        .score-number { font-size: 56px; font-weight: 700; margin-bottom: 8px; }
+        .score-label { font-size: 18px; opacity: 0.9; }
+        .thank-you-message { background: #f7fafc; border-radius: 12px; padding: 24px; margin: 24px 0; text-align: left; }
+        .thank-you-message h3 { color: #667eea; font-size: 20px; margin-bottom: 12px; }
+        .thank-you-message p { color: #4a5568; font-size: 16px; line-height: 1.6; margin-bottom: 12px; }
+        .error-message { background: #fed7d7; color: #c53030; padding: 20px; border-radius: 12px; margin: 20px 0; display: none; font-weight: 500; }
+        .info-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-size: 14px; margin-top: 10px; }
+        .hidden { display: none !important; }
+        .timer-warning { color: #ed8936 !important; animation: pulse 1s infinite; }
+        .timer-danger { color: #e53e3e !important; animation: pulse 0.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .time-alert { background: #fff3cd; border: 2px solid #ffc107; padding: 16px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        .time-alert.danger { background: #f8d7da; border-color: #dc3545; animation: shake 0.5s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .time-alert p { margin: 0; color: #856404; font-weight: 600; text-align: center; }
+        .time-alert.danger p { color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🎯</div>
+            <h1>Evaluación Técnica</h1>
+            <p id="evaluationTitle">CoRheSelect - Gestión de Talento</p>
+            <div class="info-badge" id="techBadge">Cargando...</div>
+        </div>
+        <div class="progress-container" id="progressContainer" style="display: none;">
+            <div class="progress-info">
+                <span id="questionCounter">Preparando evaluación...</span>
+                <span id="timeRemaining">⏱️ --:--</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="error-message" id="errorMessage"></div>
+            <div class="time-alert" id="timeAlert">
+                <p id="timeAlertMessage"></p>
+            </div>
+            <div class="welcome-screen" id="welcomeScreen">
+                <h2>👋 Bienvenido/a a tu Evaluación Técnica</h2>
+                
+                <div class="welcome-intro">
+                    <p>Esta prueba forma parte del proceso de selección de <strong id="vacancyName">la vacante a la que aplicas</strong> y tiene como objetivo conocer tus conocimientos técnicos relacionados con <strong id="techNameIntro">las herramientas requeridas</strong>.</p>
+                    <p>Por favor, lee cada pregunta con atención y responde de la manera más precisa posible.</p>
+                    <p>🕐 <strong>Tiempo estimado:</strong> <span id="estimatedTime">15 a 20 minutos</span></p>
+                    <p>📋 <strong>Formato:</strong> Preguntas de opción múltiple</p>
+                </div>
+                
+                <div class="instructions">
+                    <h3>📋 Instrucciones Importantes</h3>
+                    <ul>
+                        <li>Tendrás un <strong>tiempo limitado</strong> para completarla (<span id="timePerQuestion">2 minutos por pregunta</span>).</li>
+                        <li>El temporizador comenzará automáticamente cuando presiones "Comenzar Evaluación".</li>
+                        <li>Cada pregunta tiene <strong>una sola respuesta correcta</strong>.</li>
+                        <li>Puedes navegar entre preguntas usando los botones "Anterior" y "Siguiente".</li>
+                        <li>Si el tiempo se agota, la evaluación se <strong>enviará automáticamente</strong> con las respuestas que hayas completado.</li>
+                        <li>Una vez que finalices, no podrás modificar tus respuestas.</li>
+                        <li>Asegúrate de tener una <strong>conexión estable</strong> a internet durante todo el proceso.</li>
+                    </ul>
+                </div>
+                
+                <div class="privacy-notice">
+                    <h4>🔒 Aviso de Privacidad</h4>
+                    <p>Tus datos personales y las respuestas de esta evaluación serán tratados de manera confidencial y utilizados únicamente para fines del proceso de selección. Al continuar, aceptas que CoRheSelect almacene y procese esta información de acuerdo con la normativa de protección de datos vigente (RGPD). Tus datos no serán compartidos con terceros sin tu consentimiento expreso.</p>
+                </div>
+                
+                <button class="start-btn" onclick="startEvaluation()">Comenzar Evaluación →</button>
+            </div>
+            <div class="loading" id="loadingScreen">
+                <div class="loading-spinner"></div>
+                <h3>Cargando preguntas</h3>
+                <p>Conectando con la base de datos...</p>
+            </div>
+            <div id="questionContainer" class="hidden">
+                <div class="question-card">
+                    <div class="question-number" id="questionNumber">PREGUNTA 1</div>
+                    <div class="question-text" id="questionText"></div>
+                    <div class="options-container" id="optionsContainer"></div>
+                </div>
+                <div class="navigation">
+                    <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" style="display: none;">← Anterior</button>
+                    <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" disabled>Siguiente →</button>
+                    <button class="btn btn-primary" id="finishBtn" onclick="submitEvaluation()" style="display: none;" disabled>✓ Finalizar Evaluación</button>
+                </div>
+            </div>
+            <div class="success-screen" id="successScreen">
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <h2>¡Evaluación Completada!</h2>
+                <p>Has finalizado la evaluación técnica exitosamente.</p>
+                <div class="score-card">
+                    <div class="score-number" id="finalScore">-/-</div>
+                    <div class="score-label">Respuestas correctas</div>
+                </div>
+                <div class="thank-you-message">
+                    <h3>📧 ¿Qué sigue ahora?</h3>
+                    <p><strong>1. Revisión de resultados:</strong> Nuestro equipo evaluará tus respuestas en las próximas 24-48 horas.</p>
+                    <p><strong>2. Notificación:</strong> Recibirás un correo electrónico con el resultado y los siguientes pasos del proceso.</p>
+                    <p><strong>3. Próxima fase:</strong> Si apruebas esta evaluación, te contactaremos para la siguiente etapa del proceso de selección.</p>
+                </div>
+                <div class="thank-you-message">
+                    <h3>🙏 Gracias por tu tiempo</h3>
+                    <p>Apreciamos el esfuerzo que has dedicado a completar esta evaluación. Independientemente del resultado, valoramos tu interés en formar parte de nuestro equipo.</p>
+                    <p><strong>Puedes cerrar esta ventana.</strong> Te mantendremos informado/a sobre tu proceso.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+const CONFIG = {
+    BASE_ID: 'appvaNZdmHt24cHJV',
+    QUESTIONS_TABLE: 'tblFqfMPK6ARWjwS4',
+    EVALUATIONS_TABLE: 'tblozGLg1exvwNp8I',
+    RESULTS_TABLE: 'tbl5YjVUVAwMumylA',
+    MINUTES_PER_QUESTION: 2
+};
+
+let state = {
+    questions: [],
+    currentIndex: 0,
+    answers: {},
+    evaluationId: null,
+    candidateEmail: null,
+    technology: null,
+    startTime: null,
+    token: null,
+    questionIds: [],
+    timerInterval: null,
+    totalTimeSeconds: 0,
+    remainingTimeSeconds: 0,
+    timeExpired: false
+};
+
+function getURLParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        evaluationId: params.get('evaluation_id'),
+        candidateEmail: params.get('email'),
+        technology: params.get('technology') || 'Evaluación General',
+        token: params.get('token')
+    };
+}
+
+function parseOptions(optionsText) {
+    if (!optionsText) return {};
+    const options = {};
+    const lines = optionsText.split('\n').filter(line => line.trim());
+    lines.forEach(line => {
+        const match = line.match(/^([a-d])\)\s*(.+)$/i);
+        if (match) {
+            options[match[1].toUpperCase()] = match[2].trim();
+        }
+    });
+    return options;
+}
+
+async function startEvaluation() {
+    document.getElementById('welcomeScreen').classList.add('hidden');
+    document.getElementById('loadingScreen').style.display = 'block';
+    await loadQuestions();
+}
+
+async function loadQuestions() {
+    const params = getURLParams();
+    state.evaluationId = params.evaluationId;
+    state.candidateEmail = params.candidateEmail;
+    state.technology = params.technology;
+    state.token = params.token;
+    
+    if (!state.evaluationId || !state.candidateEmail) {
+        showError('⚠️ URL inválida. Este enlace debe ser generado desde CoRheSelect.');
+        return;
+    }
+    if (!state.token) {
+        showError('⚠️ Configuración incompleta. Contacta al administrador.');
+        return;
+    }
+
+    document.getElementById('techBadge').textContent = `📚 ${state.technology}`;
+    document.getElementById('techNameIntro').textContent = state.technology;
+
+    try {
+        console.log('🔄 Paso 1: Obteniendo configuración de resultados...');
+        const resultUrl = `https://api.airtable.com/v0/${CONFIG.BASE_ID}/${CONFIG.RESULTS_TABLE}/${state.evaluationId}`;
+        const resultResponse = await fetch(resultUrl, {
+            headers: { 'Authorization': `Bearer ${state.token}` }
+        });
+        if (!resultResponse.ok) throw new Error('No se pudo cargar la evaluación');
+        
+        const resultData = await resultResponse.json();
+        console.log('✅ Datos de resultado:', resultData.fields);
+        
+        const evaluationLinks = resultData.fields['Nombre de la evaluación'] || [];
+        console.log('📝 Links de evaluación encontrados:', evaluationLinks);
+        
+        if (!evaluationLinks || evaluationLinks.length === 0) {
+            throw new Error('No hay evaluación asignada a este resultado');
+        }
+        
+        const evaluationConfigId = evaluationLinks[0];
+        console.log('📝 ID de configuración de evaluación:', evaluationConfigId);
+
+        console.log('🔄 Paso 2: Obteniendo preguntas asignadas...');
+        const evalConfigUrl = `https://api.airtable.com/v0/${CONFIG.BASE_ID}/${CONFIG.EVALUATIONS_TABLE}/${evaluationConfigId}`;
+        const evalConfigResponse = await fetch(evalConfigUrl, {
+            headers: { 'Authorization': `Bearer ${state.token}` }
+        });
+        if (!evalConfigResponse.ok) throw new Error('No se pudo cargar configuración de preguntas');
+        
+        const evalConfigData = await evalConfigResponse.json();
+        console.log('✅ Configuración de evaluación:', evalConfigData.fields);
+        
+        state.questionIds = evalConfigData.fields['Preguntas de la evaluación'] || [];
+        
+        if (state.questionIds.length === 0) {
+            throw new Error('No hay preguntas asignadas a esta evaluación');
+        }
+        console.log('📝 IDs de preguntas a cargar:', state.questionIds);
+
+        console.log('🔄 Paso 3: Cargando preguntas específicas...');
+        const formula = `OR(${state.questionIds.map(id => `RECORD_ID()='${id}'`).join(',')})`;
+        const questionsUrl = `https://api.airtable.com/v0/${CONFIG.BASE_ID}/${CONFIG.QUESTIONS_TABLE}?filterByFormula=${encodeURIComponent(formula)}`;
+        const questionsResponse = await fetch(questionsUrl, {
+            headers: { 'Authorization': `Bearer ${state.token}` }
+        });
+        if (!questionsResponse.ok) throw new Error('No se pudieron cargar preguntas');
+        
+        const questionsData = await questionsResponse.json();
+        console.log('✅ Preguntas recibidas:', questionsData.records.length);
+        
+        state.questions = state.questionIds.map(id => {
+            const record = questionsData.records.find(r => r.id === id);
+            if (!record) return null;
+            const optionsText = record.fields['Opciones de respuesta'] || '';
+            const options = parseOptions(optionsText);
+            return {
+                id: record.id,
+                text: record.fields['Pregunta'] || 'Pregunta sin texto',
+                options: options,
+                correctAnswer: record.fields['Respuesta correcta']
+            };
+        }).filter(q => q && q.text && Object.keys(q.options).length > 0);
+
+        if (state.questions.length === 0) throw new Error('No se encontraron preguntas válidas');
+        
+        state.totalTimeSeconds = state.questions.length * CONFIG.MINUTES_PER_QUESTION * 60;
+        state.remainingTimeSeconds = state.totalTimeSeconds;
+        
+        console.log(`✅ ${state.questions.length} preguntas listas para evaluación`);
+        console.log(`⏱️ Tiempo total: ${state.questions.length * CONFIG.MINUTES_PER_QUESTION} minutos`);
+        
+        state.startTime = new Date();
+        document.getElementById('loadingScreen').style.display = 'none';
+        document.getElementById('progressContainer').style.display = 'block';
+        document.getElementById('questionContainer').classList.remove('hidden');
+        renderQuestion();
+        startTimer();
+    } catch (error) {
+        console.error('❌ Error completo:', error);
+        showError(`❌ ${error.message}`);
+    }
+}
+
+function renderQuestion() {
+    const question = state.questions[state.currentIndex];
+    const total = state.questions.length;
+    document.getElementById('questionNumber').textContent = `PREGUNTA ${state.currentIndex + 1} DE ${total}`;
+    document.getElementById('questionCounter').textContent = `Pregunta ${state.currentIndex + 1} de ${total}`;
+    document.getElementById('questionText').textContent = question.text;
+    const progress = ((state.currentIndex + 1) / total) * 100;
+    document.getElementById('progressBar').style.width = `${progress}%`;
+    
+    const container = document.getElementById('optionsContainer');
+    container.innerHTML = '';
+    Object.entries(question.options).forEach(([letter, text]) => {
+        const isSelected = state.answers[state.currentIndex] === letter;
+        const optionDiv = document.createElement('div');
+        optionDiv.className = `option ${isSelected ? 'selected' : ''}`;
+        optionDiv.onclick = () => selectOption(letter);
+        optionDiv.innerHTML = `<div class="option-letter">${letter}</div><div class="option-text">${text}</div>`;
+        container.appendChild(optionDiv);
+    });
+    updateButtons();
+}
+
+function selectOption(letter) {
+    state.answers[state.currentIndex] = letter;
+    renderQuestion();
+}
+
+function nextQuestion() {
+    if (state.currentIndex < state.questions.length - 1) {
+        state.currentIndex++;
+        renderQuestion();
+    }
+}
+
+function previousQuestion() {
+    if (state.currentIndex > 0) {
+        state.currentIndex--;
+        renderQuestion();
+    }
+}
+
+function updateButtons() {
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    prevBtn.style.display = state.currentIndex === 0 ? 'none' : 'block';
+    const isAnswered = state.answers[state.currentIndex] !== undefined;
+    const isLastQuestion = state.currentIndex === state.questions.length - 1;
+    if (isLastQuestion) {
+        nextBtn.style.display = 'none';
+        finishBtn.style.display = 'block';
+        finishBtn.disabled = !isAnswered;
+    } else {
+        nextBtn.style.display = 'block';
+        finishBtn.style.display = 'none';
+        nextBtn.disabled = !isAnswered;
+    }
+}
+
+async function submitEvaluation(autoSubmit = false) {
+    if (state.timeExpired && !autoSubmit) return;
+    
+    const finishBtn = document.getElementById('finishBtn');
+    if (finishBtn) {
+        finishBtn.disabled = true;
+        finishBtn.innerHTML = autoSubmit ? '⏳ Enviando automáticamente...' : '⏳ Enviando resultados...';
+    }
+    
+    if (state.timerInterval) clearInterval(state.timerInterval);
+    
+    try {
+        let correctCount = 0;
+        for (let i = 0; i < state.questions.length; i++) {
+            if (state.answers[i] === state.questions[i].correctAnswer) {
+                correctCount++;
+            }
+        }
+        const total = state.questions.length;
+        const percentage = Math.round((correctCount / total) * 100);
+        const timeSpent = Math.round((state.totalTimeSeconds - state.remainingTimeSeconds) / 60);
+        
+        await fetch(`https://api.airtable.com/v0/${CONFIG.BASE_ID}/${CONFIG.RESULTS_TABLE}`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${state.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                records: [{
+                    id: state.evaluationId,
+                    fields: {
+                        'Puntaje obtenido': correctCount,
+                        'Puntaje total': total,
+                        'Porcentaje': percentage,
+                        'Estado': percentage >= 70 ? 'APROBADO' : 'NO APROBADO',
+                        'Tiempo (minutos)': timeSpent,
+                        'Fecha completado': new Date().toISOString()
+                    }
+                }]
+            })
+        });
+        
+        document.getElementById('progressContainer').style.display = 'none';
+        document.getElementById('questionContainer').classList.add('hidden');
+        document.getElementById('timeAlert').style.display = 'none';
+        document.getElementById('successScreen').style.display = 'block';
+        document.getElementById('finalScore').textContent = `${correctCount}/${total}`;
+    } catch (error) {
+        console.error('❌ Error al guardar:', error);
+        const correctCount = Object.keys(state.answers).filter(key => state.answers[key] === state.questions[key].correctAnswer).length;
+        document.getElementById('progressContainer').style.display = 'none';
+        document.getElementById('questionContainer').classList.add('hidden');
+        document.getElementById('timeAlert').style.display = 'none';
+        document.getElementById('successScreen').style.display = 'block';
+        document.getElementById('finalScore').textContent = `${correctCount}/${state.questions.length}`;
+    }
+}
+
+function startTimer() {
+    state.timerInterval = setInterval(() => {
+        if (state.timeExpired) return;
+        state.remainingTimeSeconds--;
+        
+        const minutes = Math.floor(state.remainingTimeSeconds / 60);
+        const seconds = state.remainingTimeSeconds % 60;
+        const timeDisplay = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        const timerElement = document.getElementById('timeRemaining');
+        timerElement.textContent = `⏱️ ${timeDisplay}`;
+
+        const alertDiv = document.getElementById('timeAlert');
+        const alertMessage = document.getElementById('timeAlertMessage');
+
+        if (state.remainingTimeSeconds === 300) {
+            timerElement.classList.add('timer-warning');
+            alertDiv.style.display = 'block';
+            alertDiv.className = 'time-alert';
+            alertMessage.textContent = '⚠️ Quedan 5 minutos para finalizar la evaluación';
+        } else if (state.remainingTimeSeconds === 120) {
+            timerElement.classList.remove('timer-warning');
+            timerElement.classList.add('timer-danger');
+            alertDiv.className = 'time-alert danger';
+            alertMessage.textContent = '🚨 ¡Quedan solo 2 minutos! La evaluación se enviará automáticamente';
+        } else if (state.remainingTimeSeconds === 60) {
+            alertDiv.className = 'time-alert danger';
+            alertMessage.textContent = '🚨 ¡ÚLTIMO MINUTO! Revisa tus respuestas';
+        }
+
+        if (state.remainingTimeSeconds <= 0) {
+            clearInterval(state.timerInterval);
+            state.timeExpired = true;
+            timerElement.textContent = '⏱️ 00:00';
+            alertDiv.style.display = 'block';
+            alertDiv.className = 'time-alert danger';
+            alertMessage.textContent = '⏰ Tiempo agotado - Enviando evaluación automáticamente...';
+            setTimeout(() => submitEvaluation(true), 2000);
+        }
+    }, 1000);
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('welcomeScreen').classList.add('hidden');
+    console.error('❌', message);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const params = getURLParams();
+    document.getElementById('techBadge').textContent = `📚 ${params.technology}`;
+    document.getElementById('techNameIntro').textContent = params.technology;
+    
+    const totalMinutes = CONFIG.MINUTES_PER_QUESTION * 10;
+    document.getElementById('estimatedTime').textContent = `${totalMinutes} minutos aproximadamente`;
+    document.getElementById('timePerQuestion').textContent = `${CONFIG.MINUTES_PER_QUESTION} minutos por pregunta`;
+});
+
+window.addEventListener('beforeunload', (e) => {
+    if (state.startTime && !state.timeExpired && !document.getElementById('questionContainer').classList.contains('hidden')) {
+        e.preventDefault();
+        e.returnValue = '¿Estás seguro de que quieres salir? Tu progreso se perderá.';
+        return e.returnValue;
+    }
+});
+    </script>
+</body>
+</html>
