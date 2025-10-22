@@ -255,7 +255,7 @@ async function loadQuestions() {
         const resultData = await resultResponse.json();
         console.log('✅ Datos de resultado:', resultData.fields);
         
-        const evaluationLinks = resultData.fields['Nombre de la evaluación'] || [];
+        const evaluationLinks = resultData.fields['Evaluación asignada'] || [];
         console.log('📝 Links de evaluación encontrados:', evaluationLinks);
         
         if (!evaluationLinks || evaluationLinks.length === 0) {
